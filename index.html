@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>왕국 수호대 - 타워 디펜스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wood:#3b2415;
+  --wood-dark:#241408;
+  --parchment:#ecdcb0;
+  --parchment-dark:#d8c393;
+  --gold:#d4af37;
+  --gold-bright:#f4d76b;
+  --blood:#7a1f1f;
+  --ink:#2a1c0f;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;width:100%;height:100%;background:#000;overflow:hidden;
+  font-family:'Cinzel',Georgia,'Times New Roman',serif;color:var(--parchment);user-select:none;}
+button{font-family:inherit;cursor:pointer;}
+.hidden{display:none !important;}
+#app{position:relative;width:100vw;height:100vh;overflow:hidden;}
+
+/* ---------- Screens ---------- */
+.screen{position:absolute;inset:0;width:100%;height:100%;}
+
+/* Main Menu */
+#screen-menu{
+  background:
+    linear-gradient(to bottom, rgba(20,10,5,0.35), rgba(10,5,2,0.75) 70%, #05030200),
+    radial-gradient(ellipse at 50% 30%, #6b4a2f 0%, #3a2716 45%, #1c1208 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding-top:5vh;position:relative;
+}
+.castle-art{position:absolute;bottom:0;left:0;width:100%;height:62%;pointer-events:none;
+  display:flex;align-items:flex-end;justify-content:center;opacity:0.85;}
+.castle-art svg{width:100%;height:100%;}
+.game-title{font-family:'Cinzel Decorative',Cinzel,serif;font-size:3.4rem;font-weight:700;
+  color:var(--gold-bright);text-shadow:0 0 18px rgba(0,0,0,0.8),0 0 30px rgba(212,175,55,0.4);
+  letter-spacing:2px;z-index:2;margin-bottom:0.2em;text-align:center;}
+.game-subtitle{color:var(--parchment-dark);letter-spacing:4px;font-size:0.95rem;margin-bottom:3em;z-index:2;opacity:0.85;}
+.menu-buttons{display:flex;flex-direction:column;align-items:center;gap:14px;z-index:2;}
+.btn-medieval{
+  background:linear-gradient(180deg,#6b4423,#3f2513);
+  border:3px solid var(--gold);border-radius:6px;color:var(--gold-bright);
+  padding:14px 46px;font-size:1.3rem;font-weight:600;letter-spacing:2px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.6), inset 0 0 12px rgba(212,175,55,0.15);
+  transition:transform 0.12s, box-shadow 0.12s;
+}
+.btn-medieval:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 6px 16px rgba(0,0,0,0.7), inset 0 0 16px rgba(244,215,107,0.35);}
+.btn-medieval:active{transform:translateY(0) scale(0.98);}
+.btn-small{padding:8px 22px;font-size:0.95rem;border-width:2px;}
+.settings-row{display:flex;gap:10px;margin-top:6px;}
+.btn-ghost{background:rgba(0,0,0,0.35);border:2px solid var(--parchment-dark);color:var(--parchment-dark);
+  padding:8px 18px;border-radius:5px;font-size:0.85rem;letter-spacing:1px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-bright);}
+
+/* Tower Info modal */
+.overlay-box-wide{max-width:640px;width:88vw;max-height:82vh;overflow-y:auto;padding:28px 34px;}
+.ti-header{position:sticky;top:-28px;margin:-28px -34px 16px;padding:14px 34px;
+  background:linear-gradient(180deg,#3b2415,#2c1a0d);border-bottom:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:space-between;z-index:1;
+  align-self:stretch;width:auto;}
+.tower-info-list{display:flex;flex-direction:column;gap:12px;width:100%;}
+.tower-info-card{background:rgba(0,0,0,0.3);border:2px solid var(--parchment-dark);border-radius:8px;padding:12px 14px;text-align:left;}
+.tower-info-card .ti-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.tower-info-card .ti-icon{font-size:1.8rem;}
+.tower-info-card .ti-name{font-size:1.05rem;font-weight:700;color:var(--gold-bright);}
+.tower-info-card .ti-desc{font-size:0.82rem;color:var(--parchment-dark);margin-bottom:8px;}
+.ti-levels{width:100%;border-collapse:collapse;font-size:0.78rem;}
+.ti-levels th,.ti-levels td{padding:3px 6px;text-align:center;border-bottom:1px solid rgba(212,175,55,0.2);}
+.ti-levels th{color:var(--gold-bright);font-weight:600;}
+
+/* Stage Select */
+#screen-stages{background:radial-gradient(ellipse at 50% 20%, #4a3320 0%, #1c1208 80%);
+  display:flex;flex-direction:column;align-items:center;padding-top:6vh;}
+.panel-title{font-size:2rem;color:var(--gold-bright);letter-spacing:3px;margin-bottom:1.4em;text-shadow:0 0 10px rgba(0,0,0,0.7);}
+.stage-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;max-width:760px;padding:0 20px;}
+.stage-btn{width:150px;height:110px;background:linear-gradient(180deg,#5a3c22,#2e1b0e);
+  border:3px solid var(--gold);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--gold-bright);font-size:1.3rem;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,0.6);}
+.stage-btn:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(0,0,0,0.7);}
+.stage-btn.locked{background:linear-gradient(180deg,#3a3a3a,#181818);border-color:#5a5a5a;color:#7a7a7a;cursor:not-allowed;}
+.stage-btn.locked:hover{transform:none;box-shadow:0 4px 10px rgba(0,0,0,0.6);}
+.stage-btn .lock-icon{font-size:1.6rem;margin-bottom:4px;opacity:0.6;}
+.back-row{margin-top:2.4em;}
+
+/* Game Screen */
+#screen-game{display:flex;background:#0d0a06;width:100%;height:100%;}
+#gameStageOuter{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:#000;}
+#canvasWrap{position:relative;}
+#gameCanvas{display:block;background:#3c5a2e;}
+#sidePanel{width:320px;flex:0 0 320px;background:linear-gradient(180deg,#2e1c0f,#1a0f07);
+  border-left:4px solid var(--gold);padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.panel-box{background:rgba(0,0,0,0.28);border:2px solid var(--parchment-dark);border-radius:6px;padding:10px 12px;}
+.panel-box h3{margin:0 0 8px 0;font-size:0.95rem;color:var(--gold-bright);letter-spacing:1px;border-bottom:1px solid rgba(212,175,55,0.3);padding-bottom:5px;}
+.stat-row{display:flex;justify-content:space-between;font-size:0.9rem;margin:4px 0;}
+.stat-row .val{color:var(--gold-bright);font-weight:700;}
+#hpBarOuter{width:100%;height:16px;background:#3a0f0f;border:1px solid #000;border-radius:3px;overflow:hidden;}
+#hpBarInner{height:100%;background:linear-gradient(90deg,#8a1c1c,#d43a3a);width:100%;transition:width 0.2s;}
+#waveComp{display:flex;flex-wrap:wrap;gap:8px;}
+.comp-chip{background:rgba(0,0,0,0.35);border:1px solid var(--parchment-dark);border-radius:5px;padding:4px 8px;font-size:0.85rem;display:flex;align-items:center;gap:4px;}
+#prepTimerBox{text-align:center;}
+#prepTimerBox .big{font-size:2rem;color:var(--gold-bright);font-weight:700;}
+.tower-count-row{display:flex;justify-content:space-between;font-size:0.82rem;margin:3px 0;color:var(--parchment-dark);}
+.tower-count-row .n{color:var(--gold-bright);}
+#buildOptions{display:flex;flex-direction:column;gap:8px;}
+.tower-opt{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.3);border:1px solid var(--parchment-dark);
+  border-radius:5px;padding:8px;transition:background 0.15s;}
+.tower-opt:not(.disabled):hover{background:rgba(212,175,55,0.15);border-color:var(--gold);cursor:pointer;}
+.tower-opt.disabled{opacity:0.4;cursor:not-allowed;}
+.tower-opt .icon{font-size:1.6rem;width:36px;text-align:center;}
+.tower-opt .info{flex:1;}
+.tower-opt .info .name{font-size:0.88rem;font-weight:700;color:var(--gold-bright);}
+.tower-opt .info .sub{font-size:0.72rem;color:var(--parchment-dark);}
+#selectedInfo .stat-row{font-size:0.82rem;}
+.stat-arrow{color:var(--parchment-dark);}
+.stat-up{color:#7bdc5e;font-weight:700;}
+.stat-down{color:#7bdc5e;font-weight:700;}
+.stat-delta{color:#7bdc5e;font-size:0.75rem;}
+#upgradeBtn,#sellBtn{width:100%;margin-top:6px;padding:8px;border-radius:5px;font-size:0.85rem;letter-spacing:1px;}
+#upgradeBtn{background:linear-gradient(180deg,#3d5f2f,#1f3316);border:2px solid #7bbf5e;color:#d8f5c4;}
+#upgradeBtn:disabled{opacity:0.4;cursor:not-allowed;}
+#sellBtn{background:linear-gradient(180deg,#5f2f2f,#331616);border:2px solid #bf5e5e;color:#f5c4c4;}
+#waveBanner{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);
+  font-size:2.4rem;color:var(--gold-bright);text-shadow:0 0 20px rgba(0,0,0,0.9),0 0 10px gold;
+  z-index:50;pointer-events:none;letter-spacing:3px;opacity:0;transition:opacity 0.3s;}
+#waveBanner.show{opacity:1;}
+
+#waveIndicator{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  text-align:center;pointer-events:none;z-index:20;}
+#waveIndicator .wv-num{font-size:1.5rem;font-weight:700;color:var(--gold-bright);
+  text-shadow:0 2px 6px rgba(0,0,0,0.9),0 0 14px rgba(0,0,0,0.6);letter-spacing:2px;}
+#waveIndicator .wv-remain{font-size:0.85rem;color:var(--parchment-dark);
+  text-shadow:0 2px 4px rgba(0,0,0,0.9);letter-spacing:1px;margin-top:2px;}
+
+#goldRow{position:relative;display:flex;align-items:center;gap:8px;
+  background:linear-gradient(180deg,rgba(212,175,55,0.18),rgba(212,175,55,0.05));
+  border:1px solid rgba(212,175,55,0.5);border-radius:6px;padding:8px 10px;margin-bottom:8px;}
+#goldRow .gold-icon{font-size:1.5rem;}
+#goldRow #goldVal{font-size:1.5rem;font-weight:700;color:var(--gold-bright);
+  text-shadow:0 0 8px rgba(212,175,55,0.5);}
+#goldRow.gold-pulse{animation:goldPulse 0.5s ease;}
+@keyframes goldPulse{
+  0%{ box-shadow:0 0 0 rgba(244,215,107,0); }
+  30%{ box-shadow:0 0 18px rgba(244,215,107,0.85); border-color:var(--gold-bright); }
+  100%{ box-shadow:0 0 0 rgba(244,215,107,0); }
+}
+#goldRow.gold-pulse #goldVal{animation:goldNumPop 0.5s ease;}
+@keyframes goldNumPop{
+  0%{ transform:scale(1); }
+  35%{ transform:scale(1.35); color:#fff8d0; }
+  100%{ transform:scale(1); }
+}
+#goldPopupHost{position:absolute;left:50%;top:-4px;transform:translateX(-50%);
+  pointer-events:none;width:0;height:0;}
+.gold-popup{position:absolute;left:0;top:0;transform:translateX(-50%);
+  white-space:nowrap;color:#8fe86b;font-weight:700;font-size:1rem;
+  text-shadow:0 0 6px rgba(0,0,0,0.8);animation:goldPopupFloat 1s ease forwards;}
+@keyframes goldPopupFloat{
+  0%{ opacity:0; transform:translate(-50%,0) scale(0.8); }
+  15%{ opacity:1; transform:translate(-50%,-6px) scale(1.1); }
+  100%{ opacity:0; transform:translate(-50%,-42px) scale(1); }
+}
+
+/* overlays */
+.overlay{position:absolute;inset:0;background:rgba(5,3,1,0.82);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;z-index:100;gap:18px;}
+.overlay-box{background:linear-gradient(180deg,#3b2415,#1c1208);border:3px solid var(--gold);
+  border-radius:10px;padding:36px 50px;display:flex;flex-direction:column;align-items:center;gap:16px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.8);}
+.overlay-title{font-size:1.8rem;color:var(--gold-bright);letter-spacing:2px;}
+.overlay-sub{color:var(--parchment-dark);font-size:0.95rem;}
+
+/* small buttons in canvas panel */
+.mini-btn{background:rgba(0,0,0,0.4);border:1px solid var(--gold);color:var(--gold-bright);
+  padding:5px 10px;border-radius:4px;font-size:0.78rem;}
+.mini-btn:hover{background:rgba(212,175,55,0.25);}
+
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-thumb{background:var(--wood);border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= MAIN MENU ================= -->
+  <div id="screen-menu" class="screen">
+    <div class="castle-art">
+      <svg viewBox="0 0 1200 500" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="hillGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2a1c10"/>
+            <stop offset="100%" stop-color="#120b05"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="600" cy="520" rx="900" ry="140" fill="url(#hillGrad)"/>
+        <g fill="#1c130b">
+          <rect x="430" y="260" width="340" height="220"/>
+          <rect x="380" y="330" width="60" height="150"/>
+          <rect x="760" y="330" width="60" height="150"/>
+          <rect x="560" y="150" width="80" height="330"/>
+          <polygon points="560,150 600,90 640,150"/>
+          <polygon points="380,330 410,290 440,330"/>
+          <polygon points="760,330 790,290 820,330"/>
+          <rect x="450" y="380" width="40" height="100"/>
+          <rect x="710" y="380" width="40" height="100"/>
+          <rect x="585" y="400" width="30" height="80"/>
+        </g>
+      </svg>
+    </div>
+    <div class="game-title">왕국 수호대</div>
+    <div class="game-subtitle">KINGDOM DEFENDERS</div>
+    <div class="menu-buttons">
+      <button class="btn-medieval" id="btnStart">게임 시작</button>
+      <div class="settings-row">
+        <button class="btn-ghost" id="btnMute">🔊 소리 켜짐</button>
+        <button class="btn-ghost" id="btnTowerInfo">📖 타워 설명</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= STAGE SELECT ================= -->
+  <div id="screen-stages" class="screen hidden">
+    <div class="panel-title">스테이지 선택</div>
+    <div class="stage-grid" id="stageGrid"></div>
+    <div class="back-row">
+      <button class="btn-ghost" id="btnStagesBack">← 메인 메뉴로</button>
+    </div>
+  </div>
+
+  <!-- ================= GAME SCREEN ================= -->
+  <div id="screen-game" class="screen hidden">
+    <div id="gameStageOuter">
+      <div id="canvasWrap">
+        <canvas id="gameCanvas" width="1000" height="700"></canvas>
+        <div id="waveBanner"></div>
+        <div id="waveIndicator">
+          <div class="wv-num">웨이브 <span id="waveNumTop">1</span> / <span id="waveTotalTop">13</span></div>
+          <div class="wv-remain"><span id="waveRemainTop">12</span> 웨이브 남음</div>
+        </div>
+      </div>
+    </div>
+    <div id="sidePanel">
+      <div class="panel-box" id="goldBox">
+        <h3>왕국 현황</h3>
+        <div id="goldRow">
+          <span class="gold-icon">💰</span>
+          <span class="val" id="goldVal">0 G</span>
+          <div id="goldPopupHost"></div>
+        </div>
+        <div class="stat-row"><span>웨이브</span><span class="val" id="waveVal">1 / 13</span></div>
+        <div id="hpBarOuter"><div id="hpBarInner"></div></div>
+        <div class="stat-row"><span>성벽 체력</span><span class="val" id="hpVal">20 / 20</span></div>
+      </div>
+
+      <div class="panel-box" id="prepBox">
+        <h3>다음 웨이브</h3>
+        <div id="waveComp"></div>
+        <div id="prepTimerBox" style="margin-top:8px;">
+          <div class="big" id="prepTimerVal">20</div>
+          <button class="btn-medieval btn-small" id="btnStartWave" style="margin-top:6px;width:100%;">웨이브 시작</button>
+        </div>
+      </div>
+
+      <div class="panel-box">
+        <h3>타워 설치 (<span id="towerSlotCount">0/9</span>)</h3>
+        <div id="towerCounts"></div>
+      </div>
+
+      <div class="panel-box" id="selectedPanel">
+        <h3 id="selectedTitle">설치 위치 선택</h3>
+        <div id="buildOptions"></div>
+        <div id="selectedInfo" class="hidden"></div>
+        <button class="mini-btn" id="btnDeselect" style="margin-top:8px;width:100%;">닫기</button>
+      </div>
+
+      <button class="btn-ghost" id="btnPauseOpen" style="align-self:center;">⏸ 일시정지 (ESC)</button>
+    </div>
+  </div>
+
+  <!-- ============ PAUSE OVERLAY ============ -->
+  <div id="pauseOverlay" class="overlay hidden">
+    <div class="overlay-box">
+      <div class="overlay-title">일시 정지</div>
+      <button class="btn-medieval btn-small" id="btnResume">계속하기</button>
+      <button class="btn-medieval btn-small" id="btnReset">리셋</button>
+      <button class="btn-medieval btn-small" id="btnReturnMenu">돌아가기</button>
+    </div>
+  </div>
+
+  <!-- ============ GAME OVER OVERLAY ============ -->
+  <div id="gameOverOverlay" class="overlay hidden">
+    <div class="overlay-box">
+      <div class="overlay-title" style="color:#e05a5a;">성벽이 함락되었습니다...</div>
+      <div class="overlay-sub" id="gameOverStat"></div>
+      <button class="btn-medieval btn-small" id="btnRetry">다시 시도</button>
+      <button class="btn-medieval btn-small" id="btnGoMenu1">메인 메뉴로</button>
+    </div>
+  </div>
+
+  <!-- ============ TOWER INFO OVERLAY ============ -->
+  <div id="towerInfoOverlay" class="overlay hidden">
+    <div class="overlay-box overlay-box-wide">
+      <div class="ti-header">
+        <div class="overlay-title" style="margin:0;">타워 설명</div>
+        <button class="mini-btn" id="btnTowerInfoExit">✕ 나가기</button>
+      </div>
+      <div class="tower-info-list" id="towerInfoList"></div>
+      <button class="btn-medieval btn-small" id="btnTowerInfoClose">닫기</button>
+    </div>
+  </div>
+
+  <!-- ============ CLEAR OVERLAY ============ -->
+  <div id="clearOverlay" class="overlay hidden">
+    <div class="overlay-box">
+      <div class="overlay-title">🏆 왕국을 지켜냈습니다! 🏆</div>
+      <div class="overlay-sub">모든 웨이브 클리어 - 게임 클리어!</div>
+      <button class="btn-medieval btn-small" id="btnGoMenu2">로비로 돌아가기</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   AUDIO — synthesized SFX (no external assets)
+============================================================ */
+let actx = null;
+let muted = false;
+function ensureAudio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function tone(freq, dur, type, gain, delay){
+  if(muted || !actx) return;
+  const t0 = actx.currentTime + (delay||0);
+  const osc = actx.createOscillator();
+  const g = actx.createGain();
+  osc.type = type||'sine';
+  osc.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain!==undefined?gain:0.18, t0+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  osc.connect(g); g.connect(actx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+  return osc;
+}
+function sweep(f1,f2,dur,type,gain,delay){
+  if(muted || !actx) return;
+  const t0 = actx.currentTime + (delay||0);
+  const osc = actx.createOscillator();
+  const g = actx.createGain();
+  osc.type = type||'sawtooth';
+  osc.frequency.setValueAtTime(f1, t0);
+  osc.frequency.exponentialRampToValueAtTime(Math.max(f2,1), t0+dur);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain!==undefined?gain:0.2, t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  osc.connect(g); g.connect(actx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+const SFX = {
+  archer:()=>tone(1100,0.09,'triangle',0.15),
+  warrior:()=>tone(150,0.14,'square',0.18),
+  priest:()=>tone(700,0.35,'sine',0.14),
+  golem:()=>sweep(180,60,0.22,'sawtooth',0.2),
+  mage:()=>sweep(1400,700,0.16,'sine',0.16),
+  hit:()=>tone(220,0.06,'square',0.05),
+  impact:()=>tone(950,0.035,'square',0.045),
+  gold:()=>tone(1500,0.08,'triangle',0.1),
+  build:()=>{tone(500,0.08,'triangle',0.15);tone(700,0.1,'triangle',0.12,0.06);},
+  waveStart:()=>{tone(300,0.15,'sawtooth',0.15);tone(450,0.2,'sawtooth',0.15,0.1);},
+  waveClear:()=>{tone(523,0.12,'triangle',0.16);tone(659,0.12,'triangle',0.16,0.12);tone(784,0.2,'triangle',0.18,0.24);},
+  bossHorn:()=>{sweep(90,45,1.1,'sawtooth',0.25);sweep(120,55,1.1,'sawtooth',0.15,0.15);},
+  gameover:()=>{sweep(300,60,0.9,'sawtooth',0.22);},
+  victory:()=>{[523,659,784,1046].forEach((f,i)=>tone(f,0.22,'triangle',0.18,i*0.16));}
+};
+
+/* ============================================================
+   MAP DATA
+============================================================ */
+const MAP_W = 1000, MAP_H = 700;
+const PATH = [
+  {x:60,y:80},{x:60,y:600},{x:270,y:600},{x:270,y:80},
+  {x:480,y:80},{x:480,y:600},{x:690,y:600},{x:690,y:80},{x:900,y:80}
+];
+const PATH_SEG_LEN = [];
+let PATH_TOTAL_LEN = 0;
+for(let i=0;i<PATH.length-1;i++){
+  const d = Math.hypot(PATH[i+1].x-PATH[i].x, PATH[i+1].y-PATH[i].y);
+  PATH_SEG_LEN.push(d); PATH_TOTAL_LEN += d;
+}
+const SPOTS = [
+  {x:165,y:220},{x:165,y:460},
+  {x:375,y:220},{x:375,y:460},
+  {x:585,y:220},{x:585,y:460},
+  {x:800,y:180},{x:800,y:320},{x:800,y:460}
+].map((p,i)=>({id:i, x:p.x, y:p.y, tower:null}));
+
+/* ---- Forest decoration (scattered trees/bushes, avoiding path & build spots) ---- */
+function distToSegment(px,py,ax,ay,bx,by){
+  const dx=bx-ax, dy=by-ay;
+  const lenSq = dx*dx+dy*dy;
+  let t = lenSq>0 ? ((px-ax)*dx+(py-ay)*dy)/lenSq : 0;
+  t = Math.max(0,Math.min(1,t));
+  return Math.hypot(px-(ax+t*dx), py-(ay+t*dy));
+}
+function distToPath(x,y){
+  let min = Infinity;
+  for(let i=0;i<PATH.length-1;i++){
+    const d = distToSegment(x,y,PATH[i].x,PATH[i].y,PATH[i+1].x,PATH[i+1].y);
+    if(d<min) min=d;
+  }
+  return min;
+}
+function distToSpots(x,y){
+  let min = Infinity;
+  for(const s of SPOTS){ const d=Math.hypot(x-s.x,y-s.y); if(d<min) min=d; }
+  return min;
+}
+const VILLAGE_CENTER = PATH[PATH.length-1]; // castle sits at the path's end
+const VILLAGE_RADIUS = 230;
+const FOREST_DECOR = (function(){
+  const list=[];
+  const trees=['🌲','🌳'];
+  const small=['🌿','🍄','🪨','🌾'];
+  let attempts=0;
+  while(list.length<70 && attempts<4000){
+    attempts++;
+    const x = 20+Math.random()*(MAP_W-40);
+    const y = 20+Math.random()*(MAP_H-40);
+    if(Math.hypot(x-VILLAGE_CENTER.x,y-VILLAGE_CENTER.y) < VILLAGE_RADIUS) continue;
+    if(distToPath(x,y) < 42) continue;
+    if(distToSpots(x,y) < 55) continue;
+    let tooClose=false;
+    for(const d of list){ if(Math.hypot(d.x-x,d.y-y)<32){ tooClose=true; break; } }
+    if(tooClose) continue;
+    const isTree = Math.random()<0.6;
+    const emoji = isTree ? trees[Math.floor(Math.random()*trees.length)] : small[Math.floor(Math.random()*small.length)];
+    const size = isTree ? (34+Math.random()*20) : (14+Math.random()*10);
+    list.push({x,y,emoji,size,isTree});
+  }
+  return list;
+})();
+
+/* ---- Village decoration (houses/props clustered around the castle) ---- */
+const VILLAGE_DECOR = (function(){
+  const list=[];
+  const houses=['🏠','🏡','🛖'];
+  const props=['🪵','🌾','🪣','🐓','🐑','🔥'];
+  let attempts=0;
+  while(list.length<24 && attempts<6000){
+    attempts++;
+    const x = VILLAGE_CENTER.x + (Math.random()*2-1)*VILLAGE_RADIUS;
+    const y = VILLAGE_CENTER.y + (Math.random()*2-1)*VILLAGE_RADIUS;
+    if(x<16 || x>MAP_W-16 || y<16 || y>MAP_H-16) continue;
+    if(Math.hypot(x-VILLAGE_CENTER.x,y-VILLAGE_CENTER.y) > VILLAGE_RADIUS) continue;
+    if(distToPath(x,y) < 46) continue;
+    if(distToSpots(x,y) < 58) continue;
+    let tooClose=false;
+    for(const d of list){ if(Math.hypot(d.x-x,d.y-y)<30){ tooClose=true; break; } }
+    if(tooClose) continue;
+    const isHouse = Math.random()<0.45;
+    const emoji = isHouse ? houses[Math.floor(Math.random()*houses.length)] : props[Math.floor(Math.random()*props.length)];
+    const size = isHouse ? (36+Math.random()*14) : (16+Math.random()*10);
+    list.push({x,y,emoji,size,isHouse});
+  }
+  return list;
+})();
+
+/* ============================================================
+   TOWER DEFINITIONS
+============================================================ */
+const TOWER_DEFS = {
+  archer:{
+    name:'궁수 타워', icon:'🏹', maxCount:3, attackType:'single', projectileSpeed:700, color:'#8fd14f',
+    desc:'원거리 단일 공격. 타워 중 사거리가 가장 길어 몬스터가 오는 길목을 넓게 커버한다.',
+    levels:[
+      {cost:30, dmg:6, cooldown:1.75, range:273},
+      {cost:45, dmg:9, cooldown:1.66, range:287},
+      {cost:75, dmg:12, cooldown:1.75, range:287},
+      {cost:120, dmg:13, cooldown:1.4, range:307},
+    ]
+  },
+  warrior:{
+    name:'전사 타워', icon:'⚔️', maxCount:3, attackType:'cone', color:'#e0813a',
+    desc:'근접 부채꼴 공격. 사거리는 가장 짧지만 앞쪽에 몰려있는 몬스터를 한꺼번에 벤다.',
+    levels:[
+      {cost:90, dmg:7, cooldown:3.2, range:137},
+      {cost:100, dmg:7, cooldown:3.1, range:142},
+      {cost:150, dmg:11, cooldown:3.1, range:142},
+      {cost:225, dmg:17, cooldown:3.1, range:147},
+    ]
+  },
+  priest:{
+    name:'성직자 타워', icon:'✨', maxCount:1, attackType:'debuff', color:'#dfe86b',
+    desc:'근접 디버프 타워. 공격력은 낮지만 원형 범위 안의 몬스터를 슬로우시켜 다른 타워의 화력을 오래 받게 한다. 최대 1개만 설치 가능.',
+    levels:[
+      {cost:100, dmg:1, cooldown:15, range:147},
+      {cost:200, dmg:2, cooldown:12, range:158},
+      {cost:300, dmg:2, cooldown:8, range:168},
+    ]
+  },
+  golem:{
+    name:'골렘 타워', icon:'🗿', maxCount:3, attackType:'circle', color:'#a89478',
+    desc:'근접 범위 공격. 사거리 안의 모든 몬스터를 원형으로 동시에 타격해 몰려오는 물량에 강하다.',
+    levels:[
+      {cost:130, dmg:8, cooldown:5, range:158},
+      {cost:170, dmg:11, cooldown:4.5, range:158},
+      {cost:250, dmg:21, cooldown:5.5, range:173},
+    ]
+  },
+  mage:{
+    name:'마법사 타워', icon:'🔮', maxCount:3, attackType:'aoe_ranged', projectileSpeed:520, splash:70, color:'#8a6fd1',
+    desc:'원거리 스플래시 공격. 파이어볼이 명중 지점 주변까지 함께 태워 밀집한 몬스터에게 강하다.',
+    levels:[
+      {cost:190, dmg:9, cooldown:3, range:179},
+      {cost:250, dmg:11, cooldown:3, range:196},
+      {cost:350, dmg:15, cooldown:2.7, range:214},
+    ]
+  }
+};
+const TOWER_ORDER = ['archer','warrior','priest','golem','mage'];
+
+/* ============================================================
+   MONSTER VISUALS
+============================================================ */
+const MONSTER_VISUAL = {
+  normal:{icon:'👹', size:28, contactDmg:1, name:'일반 몬스터'},
+  mutant:{icon:'🦇', size:24, contactDmg:1, name:'변이 몬스터'},
+  heavy:{icon:'🐢', size:34, contactDmg:2, name:'중갑 몬스터'},
+  miniboss:{icon:'🧌', size:42, contactDmg:3, name:'미니 보스'},
+  boss:{icon:'🐉', size:52, contactDmg:5, name:'보스'},
+  finalboss:{icon:'💀', size:60, contactDmg:8, name:'최종 보스'}
+};
+const BASE_SPEED_PX = 65; // px/sec at speed multiplier 1.0
+const CASTLE_MAX_HP = 9;
+
+/* ============================================================
+   WAVE DATA (per spec)
+============================================================ */
+const WAVES = [null,
+  {reward:85, comp:[{t:'normal',n:6,hp:12,spd:1.0}]},
+  {reward:85, comp:[{t:'normal',n:9,hp:20,spd:1.0}]},
+  {reward:105, comp:[{t:'normal',n:12,hp:29,spd:1.0}]},
+  {reward:115, comp:[{t:'normal',n:11,hp:32,spd:1.0},{t:'mutant',n:4,hp:13,spd:1.6}]},
+  {reward:130, comp:[{t:'miniboss',n:1,hp:95,spd:0.8},{t:'normal',n:3,hp:33,spd:1.0},{t:'mutant',n:3,hp:15,spd:1.6}]},
+  {reward:135, comp:[{t:'normal',n:12,hp:38,spd:1.0},{t:'mutant',n:6,hp:17,spd:1.6}]},
+  {reward:150, comp:[{t:'normal',n:10,hp:43,spd:1.0},{t:'mutant',n:5,hp:19,spd:1.6},{t:'heavy',n:2,hp:100,spd:0.65}]},
+  {reward:160, comp:[{t:'normal',n:13,hp:48,spd:1.0},{t:'mutant',n:8,hp:22,spd:1.6}]},
+  {reward:175, comp:[{t:'normal',n:10,hp:55,spd:1.0},{t:'mutant',n:6,hp:25,spd:1.6},{t:'heavy',n:4,hp:150,spd:0.65}]},
+  {reward:220, comp:[{t:'normal',n:8,hp:65,spd:1.0},{t:'mutant',n:5,hp:28,spd:1.6},{t:'boss',n:1,hp:425,spd:0.55}]},
+  {reward:190, comp:[{t:'normal',n:13,hp:72,spd:1.0},{t:'mutant',n:7,hp:31,spd:1.6},{t:'heavy',n:4,hp:190,spd:0.65}]},
+  {reward:210, comp:[{t:'normal',n:11,hp:75,spd:1.0},{t:'mutant',n:8,hp:32,spd:1.6},{t:'heavy',n:4,hp:200,spd:0.65}]},
+  {reward:0, comp:[{t:'finalboss',n:1,hp:800,spd:0.5},{t:'normal',n:5,hp:90,spd:1.0},{t:'mutant',n:5,hp:40,spd:1.7},{t:'heavy',n:3,hp:200,spd:0.65}], final:true}
+];
+const WAVE_COUNT = WAVES.length-1;
+
+/* ============================================================
+   GAME STATE
+============================================================ */
+const G = {
+  state:'menu', // menu | stages | prep | wave | paused | gameover | clear
+  prevStateBeforePause:null,
+  gold:50, castleHP:CASTLE_MAX_HP, wave:1,
+  towers:[], monsters:[], projectiles:[], effects:[],
+  spawnQueue:[], spawnTimer:0,
+  prepTimer:20,
+  selectedSpot:null,
+  activeBoss:null,
+  waveClearing:false,
+  lastTime:0,
+};
+
+function pointAt(distance){
+  let d = Math.max(0, Math.min(distance, PATH_TOTAL_LEN));
+  let i=0;
+  while(i<PATH_SEG_LEN.length && d>PATH_SEG_LEN[i]){ d-=PATH_SEG_LEN[i]; i++; }
+  if(i>=PATH_SEG_LEN.length) i = PATH_SEG_LEN.length-1;
+  const a = PATH[i], b = PATH[i+1];
+  const segLen = PATH_SEG_LEN[i]||1;
+  const t = Math.min(1, d/segLen);
+  return {x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t};
+}
+
+/* ============================================================
+   ENTITIES
+============================================================ */
+class Monster{
+  constructor(type, hp, spd){
+    this.type = type;
+    this.maxHp = hp; this.hp = hp;
+    this.baseSpd = spd;
+    this.dist = 0;
+    const p = pointAt(0);
+    this.x = p.x + (Math.random()*16-8);
+    this.y = p.y + (Math.random()*16-8);
+    this.slowUntil = 0;
+    this.slowFactor = 1;
+    this.dead = false;
+    this.reachedEnd = false;
+    this.isBoss = (type==='boss'||type==='miniboss'||type==='finalboss');
+  }
+  update(dt, now){
+    let mult = 1;
+    if(this.slowUntil>now) mult = this.slowFactor;
+    if(this.type==='boss' && this.hp <= this.maxHp*0.5) mult *= 1.5;
+    const speedPx = this.baseSpd * BASE_SPEED_PX * mult;
+    this.dist += speedPx*dt;
+    if(this.dist>=PATH_TOTAL_LEN){ this.reachedEnd = true; return; }
+    const p = pointAt(this.dist);
+    this.x = p.x; this.y = p.y;
+  }
+}
+
+class Projectile{
+  constructor(x,y,target,dmg,speed,color,splash,kind){
+    this.x=x;this.y=y;this.target=target;this.dmg=dmg;this.speed=speed;this.color=color||'#fff';this.splash=splash||0;this.dead=false;
+    this.kind = kind||'bolt';
+    this.angle = Math.atan2(target.y-y, target.x-x);
+  }
+  update(dt){
+    if(!this.target || this.target.dead || this.target.reachedEnd){ this.dead=true; return; }
+    const dx=this.target.x-this.x, dy=this.target.y-this.y;
+    const d=Math.hypot(dx,dy);
+    if(d>0.001) this.angle = Math.atan2(dy,dx);
+    const step=this.speed*dt;
+    if(d<=step){
+      this.x=this.target.x; this.y=this.target.y;
+      this.hit();
+      this.dead=true;
+    } else {
+      this.x += dx/d*step; this.y += dy/d*step;
+    }
+  }
+  hit(){
+    if(this.splash>0){
+      G.effects.push({type:'circle',x:this.x,y:this.y,r:6,maxR:this.splash,life:0.3,maxLife:0.3,color:'rgba(255,140,50,0.55)'});
+      for(const m of G.monsters){
+        if(m.dead||m.reachedEnd) continue;
+        if(Math.hypot(m.x-this.x,m.y-this.y)<=this.splash) damageMonster(m,this.dmg);
+      }
+    } else {
+      if(!this.target.dead) damageMonster(this.target,this.dmg);
+    }
+  }
+}
+
+function damageMonster(m, dmg){
+  SFX.impact();
+  m.hp -= dmg;
+  if(m.hp<=0 && !m.dead){
+    m.dead = true;
+    G.gold += 4;
+    SFX.gold();
+    G.effects.push({type:'hit',x:m.x,y:m.y,r:0,maxR:26,life:0.25,maxLife:0.25,color:'rgba(255,80,80,0.6)'});
+    G.effects.push({type:'text',x:m.x,y:m.y-18,text:'+4G',vy:-32,life:0.9,maxLife:0.9,color:'#8fe86b'});
+    if(G.activeBoss===m) G.activeBoss=null;
+  }
+}
+
+/* ============================================================
+   TOWER LOGIC
+============================================================ */
+class TowerInst{
+  constructor(spot, type){
+    this.spot = spot; this.type = type; this.level = 0; this.cd = 0; this.spentGold = TOWER_DEFS[type].levels[0].cost;
+  }
+  def(){ return TOWER_DEFS[this.type]; }
+  stats(){ return this.def().levels[this.level]; }
+  update(dt){
+    this.cd -= dt;
+    if(this.cd>0) return;
+    const st = this.stats();
+    const def = this.def();
+    const inRange = G.monsters.filter(m=>!m.dead && !m.reachedEnd && dist(this.spot,m)<=st.range);
+    if(inRange.length===0) return;
+
+    if(def.attackType==='single'){
+      const target = pickPrimary(inRange);
+      this.cd = st.cooldown;
+      SFX.archer();
+      G.projectiles.push(new Projectile(this.spot.x,this.spot.y,target,st.dmg,def.projectileSpeed,'#d9c07a',0,'arrow'));
+    } else if(def.attackType==='aoe_ranged'){
+      const target = pickPrimary(inRange);
+      this.cd = st.cooldown;
+      SFX.mage();
+      G.projectiles.push(new Projectile(this.spot.x,this.spot.y,target,st.dmg,def.projectileSpeed,'#ff8c37',def.splash,'fireball'));
+    } else if(def.attackType==='circle'){
+      this.cd = st.cooldown;
+      SFX.golem();
+      G.effects.push({type:'slam',x:this.spot.x,y:this.spot.y,life:0.28,maxLife:0.28});
+      G.effects.push({type:'circle',x:this.spot.x,y:this.spot.y,r:10,maxR:st.range,life:0.3,maxLife:0.3,color:'rgba(168,148,120,0.45)',delay:0.16});
+      inRange.forEach(m=>damageMonster(m,st.dmg));
+    } else if(def.attackType==='debuff'){
+      this.cd = st.cooldown;
+      SFX.priest();
+      G.effects.push({type:'light',x:this.spot.x,y:this.spot.y,r:0,maxR:st.range,life:0.5,maxLife:0.5,color:'rgba(255,248,208,0.9)'});
+      const now = performance.now()/1000;
+      inRange.forEach(m=>{ damageMonster(m,st.dmg); m.slowUntil = now+5; m.slowFactor=0.35; });
+    } else if(def.attackType==='cone'){
+      const target = pickPrimary(inRange);
+      const ang = Math.atan2(target.y-this.spot.y, target.x-this.spot.x);
+      this.cd = st.cooldown;
+      SFX.warrior();
+      G.effects.push({type:'fan',x:this.spot.x,y:this.spot.y,angle:ang,r:st.range,life:0.25,maxLife:0.25,color:'rgba(224,129,58,0.45)'});
+      inRange.forEach(m=>{
+        const a2 = Math.atan2(m.y-this.spot.y, m.x-this.spot.x);
+        let diff = Math.abs(a2-ang);
+        if(diff>Math.PI) diff = 2*Math.PI-diff;
+        if(diff <= Math.PI*0.55) damageMonster(m,st.dmg);
+      });
+    }
+  }
+}
+function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+function targetScore(m){ return m.dist + (m.isBoss?400:0); }
+function pickPrimary(list){
+  let best=list[0], bestScore=targetScore(list[0]);
+  for(const m of list){ const s=targetScore(m); if(s>bestScore){ best=m; bestScore=s; } }
+  return best;
+}
+
+/* ============================================================
+   WAVE / SPAWN MANAGEMENT
+============================================================ */
+function buildSpawnQueue(waveNum){
+  const wave = WAVES[waveNum];
+  const list = [];
+  const bossTokens = [];
+  wave.comp.forEach(group=>{
+    for(let i=0;i<group.n;i++){
+      const token = {t:group.t, hp:group.hp, spd:group.spd};
+      if(group.t==='boss'||group.t==='miniboss'||group.t==='finalboss') bossTokens.push(token);
+      else list.push(token);
+    }
+  });
+  // shuffle normal/mutant/heavy tokens
+  for(let i=list.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [list[i],list[j]]=[list[j],list[i]]; }
+  // insert boss tokens ~60% through
+  bossTokens.forEach(bt=>{
+    const pos = Math.floor(list.length*0.6);
+    list.splice(pos,0,bt);
+  });
+  return list;
+}
+
+function startPrepPhase(){
+  G.state = 'prep';
+  G.prepTimer = 20;
+  renderWavePreview();
+  updateHUD();
+}
+
+function beginWave(){
+  if(G.state!=='prep') return;
+  G.state = 'wave';
+  G.spawnQueue = buildSpawnQueue(G.wave);
+  G.spawnTimer = 0;
+  G.waveClearing = false;
+  SFX.waveStart();
+  showBanner('웨이브 '+G.wave+' 시작!');
+  updateHUD();
+}
+
+function checkWaveClear(){
+  if(G.state!=='wave') return;
+  if(G.spawnQueue.length===0 && G.monsters.length===0 && !G.waveClearing){
+    G.waveClearing = true;
+    const reward = WAVES[G.wave].reward;
+    G.gold += reward;
+    SFX.waveClear();
+    showBanner('웨이브 '+G.wave+' 클리어! +'+reward+'G');
+    if(WAVES[G.wave].final){
+      setTimeout(()=>{ G.state='clear'; SFX.victory(); showOverlay('clearOverlay'); }, 900);
+    } else {
+      setTimeout(()=>{ G.wave++; startPrepPhase(); }, 1200);
+    }
+  }
+}
+
+/* ============================================================
+   MAIN UPDATE LOOP
+============================================================ */
+function update(dt){
+  if(G.state==='prep'){
+    G.prepTimer -= dt;
+    if(G.prepTimer<=0){ beginWave(); }
+    updatePrepTimerUI();
+  } else if(G.state==='wave'){
+    G.spawnTimer -= dt;
+    if(G.spawnTimer<=0 && G.spawnQueue.length>0){
+      const tk = G.spawnQueue.shift();
+      const m = new Monster(tk.t, tk.hp, tk.spd);
+      G.monsters.push(m);
+      if(m.isBoss){ G.activeBoss = m; SFX.bossHorn(); }
+      G.spawnTimer = 0.85;
+    }
+    const now = performance.now()/1000;
+    G.monsters.forEach(m=>m.update(dt, now));
+    G.towers.forEach(t=>t.update(dt));
+    G.projectiles.forEach(p=>p.update(dt));
+    G.projectiles = G.projectiles.filter(p=>!p.dead);
+
+    for(const m of G.monsters){
+      if(m.reachedEnd && !m.dead){
+        G.castleHP -= MONSTER_VISUAL[m.type].contactDmg;
+        m.dead = true;
+        SFX.hit();
+        if(G.activeBoss===m) G.activeBoss=null;
+      }
+    }
+    G.monsters = G.monsters.filter(m=>!m.dead);
+    checkWaveClear();
+
+    if(G.castleHP<=0){
+      G.castleHP = 0;
+      G.state = 'gameover';
+      SFX.gameover();
+      document.getElementById('gameOverStat').textContent = '웨이브 '+G.wave+' / '+WAVE_COUNT+'까지 도달했습니다.';
+      showOverlay('gameOverOverlay');
+    }
+  }
+  G.effects.forEach(e=>{
+    if(e.delay && e.delay>0){ e.delay -= dt; if(e.delay<0){ e.life += e.delay; e.delay=0; } return; }
+    e.life -= dt; if(e.type==='text' && e.vy) e.y += e.vy*dt;
+  });
+  G.effects = G.effects.filter(e=>e.life>0);
+  updateHUD();
+}
+
+/* ============================================================
+   RENDERING
+============================================================ */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function drawPath(){
+  ctx.strokeStyle = '#7a6142';
+  ctx.lineWidth = 46;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath();
+  ctx.moveTo(PATH[0].x,PATH[0].y);
+  for(let i=1;i<PATH.length;i++) ctx.lineTo(PATH[i].x,PATH[i].y);
+  ctx.stroke();
+  ctx.strokeStyle = '#9c8058';
+  ctx.lineWidth = 38;
+  ctx.beginPath();
+  ctx.moveTo(PATH[0].x,PATH[0].y);
+  for(let i=1;i<PATH.length;i++) ctx.lineTo(PATH[i].x,PATH[i].y);
+  ctx.stroke();
+}
+
+function drawSpots(){
+  SPOTS.forEach(s=>{
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,34,0,Math.PI*2);
+    if(s.tower){
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    } else {
+      ctx.fillStyle = G.selectedSpot===s ? 'rgba(244,215,107,0.35)' : 'rgba(80,60,30,0.35)';
+    }
+    ctx.fill();
+    ctx.strokeStyle = G.selectedSpot===s ? '#f4d76b' : 'rgba(212,175,55,0.6)';
+    ctx.lineWidth = G.selectedSpot===s ? 3 : 2;
+    ctx.stroke();
+
+    if(s.tower){
+      ctx.font='30px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(TOWER_DEFS[s.tower.type].icon, s.x, s.y);
+      // level pips
+      for(let i=0;i<=s.tower.level;i++){
+        ctx.fillStyle='#f4d76b';
+        ctx.beginPath();
+        ctx.arc(s.x-18+i*10, s.y+24, 3, 0, Math.PI*2);
+        ctx.fill();
+      }
+      if(G.selectedSpot===s){
+        ctx.beginPath();
+        ctx.arc(s.x,s.y,s.tower.stats().range,0,Math.PI*2);
+        ctx.strokeStyle='rgba(244,215,107,0.55)';
+        ctx.lineWidth=1.5;
+        ctx.stroke();
+      }
+    } else {
+      ctx.font='16px sans-serif';
+      ctx.fillStyle='rgba(255,255,255,0.6)';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('+', s.x, s.y);
+    }
+  });
+}
+
+function drawPortalCastle(){
+  ctx.font='40px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🌀', PATH[0].x, PATH[0].y);
+  ctx.fillText('🏰', PATH[PATH.length-1].x, PATH[PATH.length-1].y);
+}
+
+function drawMonsters(){
+  G.monsters.forEach(m=>{
+    const vis = MONSTER_VISUAL[m.type];
+    ctx.font = vis.size+'px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(vis.icon, m.x, m.y);
+    // hp bar
+    const w = Math.max(26, vis.size*0.9);
+    const hpY = m.y - vis.size*0.62 - 6;
+    ctx.fillStyle='rgba(0,0,0,0.6)';
+    ctx.fillRect(m.x-w/2, hpY, w, 5);
+    const pct = Math.max(0,m.hp/m.maxHp);
+    ctx.fillStyle = pct>0.5?'#5fd35f':(pct>0.2?'#e0c23a':'#e04a3a');
+    ctx.fillRect(m.x-w/2, hpY, w*pct, 5);
+  });
+}
+
+function drawProjectiles(){
+  G.projectiles.forEach(p=>{
+    if(p.kind==='arrow'){
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.angle);
+      ctx.strokeStyle = p.color; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(-13,0); ctx.lineTo(5,0); ctx.stroke();
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.moveTo(9,0); ctx.lineTo(3,-3.5); ctx.lineTo(3,3.5); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#8a6a2f'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(-13,0); ctx.lineTo(-9,-3); ctx.moveTo(-13,0); ctx.lineTo(-9,3); ctx.stroke();
+      ctx.restore();
+    } else if(p.kind==='fireball'){
+      const grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,9);
+      grad.addColorStop(0,'#fff6d0'); grad.addColorStop(0.4,'#ffb347'); grad.addColorStop(1,'rgba(255,80,20,0)');
+      ctx.fillStyle = grad;
+      ctx.shadowColor='#ff8c37'; ctx.shadowBlur=14;
+      ctx.beginPath(); ctx.arc(p.x,p.y,9,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+    } else {
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,5,0,Math.PI*2);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color; ctx.shadowBlur=8;
+      ctx.fill();
+      ctx.shadowBlur=0;
+    }
+  });
+}
+
+function drawEffects(){
+  G.effects.forEach(e=>{
+    if(e.delay && e.delay>0) return;
+    const t = 1-(e.life/e.maxLife);
+    ctx.globalAlpha = Math.max(0, e.life/e.maxLife);
+    if(e.type==='slam'){
+      const fallT = Math.min(1, t/0.6);
+      const offsetY = -50*(1-fallT);
+      const scale = 0.6+0.4*fallT;
+      ctx.font = (34*scale)+'px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.globalAlpha = Math.max(0, 1-t*1.3);
+      ctx.fillText('🪨', e.x, e.y+offsetY);
+    } else if(e.type==='light'){
+      const r = e.maxR*Math.min(1,t*2.2);
+      const grad = ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,r);
+      grad.addColorStop(0,'rgba(255,250,220,0.8)'); grad.addColorStop(0.5,'rgba(255,240,180,0.25)'); grad.addColorStop(1,'rgba(255,240,180,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(e.x,e.y,r,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle = e.color; ctx.lineWidth = 1.5;
+      const rays = 8;
+      for(let i=0;i<rays;i++){
+        const a = (Math.PI*2/rays)*i;
+        ctx.beginPath();
+        ctx.moveTo(e.x,e.y);
+        ctx.lineTo(e.x+Math.cos(a)*e.maxR, e.y+Math.sin(a)*e.maxR);
+        ctx.stroke();
+      }
+    } else if(e.type==='circle'){
+      const r = e.r + (e.maxR-e.r)*t;
+      ctx.beginPath();
+      ctx.arc(e.x,e.y,r,0,Math.PI*2);
+      ctx.strokeStyle = e.color; ctx.lineWidth=4;
+      ctx.stroke();
+    } else if(e.type==='fan'){
+      ctx.beginPath();
+      ctx.moveTo(e.x,e.y);
+      ctx.arc(e.x,e.y,e.r,e.angle-Math.PI*0.55,e.angle+Math.PI*0.55);
+      ctx.closePath();
+      ctx.fillStyle = e.color;
+      ctx.fill();
+    } else if(e.type==='hit'){
+      const r = e.maxR*t;
+      ctx.beginPath();
+      ctx.arc(e.x,e.y,r,0,Math.PI*2);
+      ctx.strokeStyle = e.color; ctx.lineWidth=3;
+      ctx.stroke();
+    } else if(e.type==='text'){
+      ctx.font='bold 15px Cinzel, sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle = e.color;
+      ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=4;
+      ctx.fillText(e.text, e.x, e.y);
+      ctx.shadowBlur=0;
+    }
+    ctx.globalAlpha = 1;
+  });
+}
+
+function drawBossBar(){
+  if(!G.activeBoss || G.activeBoss.dead) return;
+  const b = G.activeBoss;
+  const vis = MONSTER_VISUAL[b.type];
+  const bw = 480, bx = (MAP_W-bw)/2, by = MAP_H-46;
+  ctx.fillStyle='rgba(0,0,0,0.55)';
+  ctx.fillRect(bx-4,by-4,bw+8,34);
+  ctx.strokeStyle='#d4af37'; ctx.lineWidth=2;
+  ctx.strokeRect(bx-4,by-4,bw+8,34);
+  const pct = Math.max(0,b.hp/b.maxHp);
+  ctx.fillStyle='#7a1f1f';
+  ctx.fillRect(bx,by,bw,26);
+  ctx.fillStyle='#d43a3a';
+  ctx.fillRect(bx,by,bw*pct,26);
+  ctx.fillStyle='#f4d76b';
+  ctx.font='16px Cinzel, serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(vis.name+'  '+Math.max(0,Math.ceil(b.hp))+' / '+b.maxHp, bx+bw/2, by+13);
+}
+
+function drawBackground(){
+  const grad = ctx.createRadialGradient(MAP_W/2,MAP_H/2,80, MAP_W/2,MAP_H/2, MAP_W*0.75);
+  grad.addColorStop(0,'#4d6f38');
+  grad.addColorStop(0.55,'#3c5a2e');
+  grad.addColorStop(1,'#233c1e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,MAP_W,MAP_H);
+}
+function drawForestDecor(){
+  FOREST_DECOR.forEach(d=>{
+    if(d.isTree){
+      ctx.beginPath();
+      ctx.ellipse(d.x, d.y+d.size*0.38, d.size*0.42, d.size*0.16, 0, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.fill();
+    }
+    ctx.font = d.size+'px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(d.emoji, d.x, d.y);
+  });
+}
+function drawVillageDecor(){
+  VILLAGE_DECOR.forEach(d=>{
+    ctx.beginPath();
+    ctx.ellipse(d.x, d.y+d.size*0.4, d.size*0.4, d.size*0.15, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.fill();
+    ctx.font = d.size+'px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(d.emoji, d.x, d.y);
+  });
+}
+
+function render(){
+  ctx.clearRect(0,0,MAP_W,MAP_H);
+  drawBackground();
+  drawForestDecor();
+  drawVillageDecor();
+  drawPath();
+  drawSpots();
+  drawPortalCastle();
+  drawMonsters();
+  drawProjectiles();
+  drawEffects();
+  drawBossBar();
+}
+
+/* ============================================================
+   GAME LOOP
+============================================================ */
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(!G.lastTime) G.lastTime = ts;
+  let dt = (ts-G.lastTime)/1000;
+  G.lastTime = ts;
+  dt = Math.min(dt, 0.05);
+  if(G.state==='prep' || G.state==='wave'){
+    update(dt);
+  }
+  if(G.state==='prep' || G.state==='wave' || G.state==='paused'){
+    render();
+  }
+}
+requestAnimationFrame(loop);
+
+/* ============================================================
+   UI — HUD
+============================================================ */
+let lastDisplayedGold = null;
+function updateHUD(){
+  const goldNow = Math.floor(G.gold);
+  if(lastDisplayedGold!==null && goldNow>lastDisplayedGold){
+    flashGold(goldNow-lastDisplayedGold);
+  }
+  lastDisplayedGold = goldNow;
+  document.getElementById('goldVal').textContent = goldNow+' G';
+  document.getElementById('waveVal').textContent = G.wave+' / '+WAVE_COUNT;
+  document.getElementById('waveNumTop').textContent = G.wave;
+  document.getElementById('waveTotalTop').textContent = WAVE_COUNT;
+  document.getElementById('waveRemainTop').textContent = Math.max(0, WAVE_COUNT-G.wave);
+  document.getElementById('hpVal').textContent = Math.max(0,Math.ceil(G.castleHP))+' / '+CASTLE_MAX_HP;
+  document.getElementById('hpBarInner').style.width = Math.max(0,(G.castleHP/CASTLE_MAX_HP*100))+'%';
+  document.getElementById('towerSlotCount').textContent = G.towers.length+'/9';
+  const countsBox = document.getElementById('towerCounts');
+  countsBox.innerHTML='';
+  TOWER_ORDER.forEach(type=>{
+    const c = G.towers.filter(t=>t.type===type).length;
+    const def = TOWER_DEFS[type];
+    const row = document.createElement('div');
+    row.className='tower-count-row';
+    row.innerHTML = '<span>'+def.icon+' '+def.name+'</span><span class="n">'+c+'/'+def.maxCount+'</span>';
+    countsBox.appendChild(row);
+  });
+  document.getElementById('prepBox').classList.toggle('hidden', G.state!=='prep');
+  updateSelectedPanelLive();
+}
+
+function flashGold(delta){
+  const row = document.getElementById('goldRow');
+  row.classList.remove('gold-pulse');
+  void row.offsetWidth; // restart animation
+  row.classList.add('gold-pulse');
+  const host = document.getElementById('goldPopupHost');
+  const popup = document.createElement('div');
+  popup.className = 'gold-popup';
+  popup.textContent = '+'+delta+'G';
+  host.appendChild(popup);
+  setTimeout(()=>popup.remove(), 1000);
+}
+
+function updatePrepTimerUI(){
+  const v = Math.max(0, Math.ceil(G.prepTimer));
+  document.getElementById('prepTimerVal').textContent = v;
+}
+
+function renderWavePreview(){
+  const box = document.getElementById('waveComp');
+  box.innerHTML='';
+  const wave = WAVES[G.wave];
+  if(!wave) return;
+  wave.comp.forEach(group=>{
+    const chip = document.createElement('div');
+    chip.className='comp-chip';
+    chip.innerHTML = '<span>'+MONSTER_VISUAL[group.t].icon+'</span><span>x'+group.n+'</span>';
+    box.appendChild(chip);
+  });
+}
+
+let bannerTimeout=null;
+function showBanner(text){
+  const el = document.getElementById('waveBanner');
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(bannerTimeout);
+  bannerTimeout = setTimeout(()=>el.classList.remove('show'), 1500);
+}
+
+/* ============================================================
+   UI — Build / Upgrade Panel
+============================================================ */
+function selectSpot(spot){
+  G.selectedSpot = spot;
+  rebuildSelectedPanel();
+}
+function deselectSpot(){
+  G.selectedSpot = null;
+  rebuildSelectedPanel();
+}
+
+/* Full DOM (re)build — only called on real user actions (select/build/upgrade/sell),
+   never from the per-frame loop, so an in-progress click can never be yanked out
+   from under the pointer. */
+function rebuildSelectedPanel(){
+  const title = document.getElementById('selectedTitle');
+  const buildBox = document.getElementById('buildOptions');
+  const infoBox = document.getElementById('selectedInfo');
+  const spot = G.selectedSpot;
+  buildBox.innerHTML=''; infoBox.innerHTML=''; infoBox.classList.add('hidden');
+  if(!spot){
+    title.textContent = '설치 위치 선택';
+    buildBox.innerHTML = '<div style="font-size:0.8rem;color:#c9b790;">맵의 빈 자리를 클릭해 타워를 설치하세요.</div>';
+    return;
+  }
+  if(!spot.tower){
+    title.textContent = '타워 건설';
+    TOWER_ORDER.forEach(type=>{
+      const def = TOWER_DEFS[type];
+      const lv0 = def.levels[0];
+      const opt = document.createElement('div');
+      opt.className = 'tower-opt';
+      opt.dataset.type = type;
+      opt.innerHTML = '<div class="icon">'+def.icon+'</div>'+
+        '<div class="info"><div class="name">'+def.name+' (<span class="cnt">0</span>/'+def.maxCount+')</div>'+
+        '<div class="sub">비용 '+lv0.cost+'G · 공격력 '+lv0.dmg+' · 공속 '+lv0.cooldown+'s</div></div>';
+      opt.onclick = ()=>{ if(!opt.classList.contains('disabled')) buildTower(spot,type); };
+      buildBox.appendChild(opt);
+    });
+  } else {
+    title.textContent = TOWER_DEFS[spot.tower.type].name;
+    infoBox.classList.remove('hidden');
+    const statsDiv = document.createElement('div');
+    statsDiv.id = 'towerStatsDiv';
+    infoBox.appendChild(statsDiv);
+    const upBtn = document.createElement('button');
+    upBtn.id='upgradeBtn';
+    upBtn.onclick = ()=>upgradeTower(spot.tower);
+    infoBox.appendChild(upBtn);
+    const sellBtn = document.createElement('button');
+    sellBtn.id='sellBtn';
+    sellBtn.onclick = ()=>sellTower(spot);
+    infoBox.appendChild(sellBtn);
+  }
+  updateSelectedPanelLive();
+}
+
+/* Builds one stat row. If nextVal is given, shows "cur → next (+delta)" so the
+   player can see exactly how much the next upgrade improves the stat before
+   buying it. lowerIsBetter flips the up/down coloring (cooldown: lower = faster). */
+function statRow(label, cur, nextVal, lowerIsBetter, suffix){
+  suffix = suffix||'';
+  if(nextVal===undefined || nextVal===null){
+    return '<div class="stat-row"><span>'+label+'</span><span class="val">'+cur+suffix+'</span></div>';
+  }
+  const diff = Math.round((nextVal-cur)*100)/100;
+  if(diff===0){
+    return '<div class="stat-row"><span>'+label+'</span><span class="val">'+cur+suffix+'</span></div>';
+  }
+  const improved = lowerIsBetter ? diff<0 : diff>0;
+  const sign = diff>0?'+':'';
+  return '<div class="stat-row"><span>'+label+'</span><span class="val">'+cur+suffix+
+    ' <span class="stat-arrow">→</span> <span class="'+(improved?'stat-up':'stat-down')+'">'+nextVal+suffix+'</span>'+
+    ' <span class="stat-delta">('+sign+diff+suffix+')</span></span></div>';
+}
+
+/* Cheap per-frame refresh — only mutates text/classes on EXISTING nodes,
+   never creates/removes elements, so it is safe to call every frame. */
+function updateSelectedPanelLive(){
+  const spot = G.selectedSpot;
+  if(!spot) return;
+  if(!spot.tower){
+    document.querySelectorAll('#buildOptions .tower-opt').forEach(opt=>{
+      const type = opt.dataset.type;
+      const def = TOWER_DEFS[type];
+      const count = G.towers.filter(t=>t.type===type).length;
+      const cost = def.levels[0].cost;
+      const disabled = count>=def.maxCount || G.gold<cost;
+      opt.classList.toggle('disabled', disabled);
+      const cntEl = opt.querySelector('.cnt');
+      if(cntEl) cntEl.textContent = count;
+    });
+  } else {
+    const t = spot.tower, def = TOWER_DEFS[t.type], st = t.stats();
+    const nextLv = def.levels[t.level+1];
+    const statsDiv = document.getElementById('towerStatsDiv');
+    if(statsDiv){
+      statsDiv.innerHTML = '<div class="stat-row"><span>레벨</span><span class="val">'+(t.level+1)+' / '+def.levels.length+'</span></div>'+
+        statRow('공격력', st.dmg, nextLv&&nextLv.dmg, false) +
+        statRow('공속', st.cooldown, nextLv&&nextLv.cooldown, true, 's') +
+        statRow('사거리', st.range, nextLv&&nextLv.range, false);
+    }
+    const upBtn = document.getElementById('upgradeBtn');
+    if(upBtn){
+      if(nextLv){
+        upBtn.textContent = '강화 ('+nextLv.cost+'G)';
+        upBtn.disabled = G.gold<nextLv.cost;
+      } else {
+        upBtn.textContent = '최대 레벨';
+        upBtn.disabled = true;
+      }
+    }
+    const sellBtn = document.getElementById('sellBtn');
+    if(sellBtn){
+      sellBtn.textContent = '판매 (+'+Math.floor(t.spentGold*0.5)+'G)';
+    }
+  }
+}
+
+function buildTower(spot,type){
+  const def = TOWER_DEFS[type];
+  const cost = def.levels[0].cost;
+  if(G.gold<cost) return;
+  const count = G.towers.filter(t=>t.type===type).length;
+  if(count>=def.maxCount) return;
+  G.gold -= cost;
+  const t = new TowerInst(spot,type);
+  spot.tower = t;
+  G.towers.push(t);
+  SFX.build();
+  rebuildSelectedPanel();
+  updateHUD();
+}
+function upgradeTower(t){
+  const def = TOWER_DEFS[t.type];
+  const nextLv = def.levels[t.level+1];
+  if(!nextLv || G.gold<nextLv.cost) return;
+  G.gold -= nextLv.cost;
+  t.spentGold += nextLv.cost;
+  t.level++;
+  SFX.build();
+  rebuildSelectedPanel();
+  updateHUD();
+}
+function sellTower(spot){
+  const t = spot.tower;
+  if(!t) return;
+  const refund = Math.floor(t.spentGold*0.5);
+  G.gold += refund;
+  G.towers = G.towers.filter(x=>x!==t);
+  spot.tower = null;
+  deselectSpot();
+  updateHUD();
+}
+
+/* ============================================================
+   Canvas interaction
+============================================================ */
+canvas.addEventListener('click', (e)=>{
+  if(G.state!=='prep' && G.state!=='wave') return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+  const mx = (e.clientX-rect.left)*scaleX, my = (e.clientY-rect.top)*scaleY;
+  let hit=null;
+  for(const s of SPOTS){ if(Math.hypot(s.x-mx,s.y-my)<=34){ hit=s; break; } }
+  if(hit) selectSpot(hit); else deselectSpot();
+});
+
+/* ============================================================
+   Screen navigation
+============================================================ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+function showOverlay(id){
+  document.getElementById(id).classList.remove('hidden');
+}
+function hideOverlay(id){
+  document.getElementById(id).classList.add('hidden');
+}
+
+function renderTowerInfo(){
+  const box = document.getElementById('towerInfoList');
+  box.innerHTML='';
+  TOWER_ORDER.forEach(type=>{
+    const def = TOWER_DEFS[type];
+    const card = document.createElement('div');
+    card.className='tower-info-card';
+    let rows='';
+    def.levels.forEach((lv,i)=>{
+      rows += '<tr><td>'+(i+1)+'</td><td>'+lv.cost+'G</td><td>'+lv.dmg+'</td><td>'+lv.cooldown+'s</td><td>'+lv.range+'</td></tr>';
+    });
+    card.innerHTML =
+      '<div class="ti-head"><span class="ti-icon">'+def.icon+'</span><span class="ti-name">'+def.name+' (최대 '+def.maxCount+'개)</span></div>'+
+      '<div class="ti-desc">'+def.desc+'</div>'+
+      '<table class="ti-levels"><thead><tr><th>Lv</th><th>비용</th><th>공격력</th><th>공속</th><th>사거리</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    box.appendChild(card);
+  });
+}
+
+function buildStageGrid(){
+  const grid = document.getElementById('stageGrid');
+  grid.innerHTML='';
+  const total = 8;
+  for(let i=1;i<=total;i++){
+    const btn = document.createElement('div');
+    if(i===1){
+      btn.className='stage-btn';
+      btn.innerHTML = '스테이지 1';
+      btn.onclick = ()=>startGame();
+    } else {
+      btn.className='stage-btn locked';
+      btn.innerHTML = '<div class="lock-icon">🔒</div>???';
+    }
+    grid.appendChild(btn);
+  }
+}
+
+function resetGameState(){
+  G.gold = 50; G.castleHP = CASTLE_MAX_HP; G.wave = 1;
+  G.towers=[]; G.monsters=[]; G.projectiles=[]; G.effects=[];
+  SPOTS.forEach(s=>s.tower=null);
+  G.spawnQueue=[]; G.spawnTimer=0; G.selectedSpot=null; G.activeBoss=null; G.waveClearing=false;
+  G.lastTime=0;
+  lastDisplayedGold = null;
+  rebuildSelectedPanel();
+}
+
+function resizeCanvas(){
+  const outer = document.getElementById('gameStageOuter');
+  const wrap = document.getElementById('canvasWrap');
+  const availW = outer.clientWidth, availH = outer.clientHeight;
+  if(availW<=0 || availH<=0) return;
+  const scale = Math.min(availW/MAP_W, availH/MAP_H);
+  const w = Math.floor(MAP_W*scale), h = Math.floor(MAP_H*scale);
+  canvas.style.width = w+'px';
+  canvas.style.height = h+'px';
+  wrap.style.width = w+'px';
+  wrap.style.height = h+'px';
+}
+window.addEventListener('resize', resizeCanvas);
+
+function startGame(){
+  ensureAudio();
+  resetGameState();
+  showScreen('screen-game');
+  resizeCanvas();
+  startPrepPhase();
+}
+
+/* ============================================================
+   Pause / ESC
+============================================================ */
+function openPause(){
+  if(G.state!=='prep' && G.state!=='wave') return;
+  G.prevStateBeforePause = G.state;
+  G.state = 'paused';
+  showOverlay('pauseOverlay');
+}
+function closePause(){
+  if(G.state!=='paused') return;
+  G.state = G.prevStateBeforePause||'prep';
+  hideOverlay('pauseOverlay');
+}
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){
+    if(G.state==='paused') closePause();
+    else if(G.state==='prep'||G.state==='wave') openPause();
+  }
+});
+
+/* ============================================================
+   Button wiring
+============================================================ */
+document.getElementById('btnStart').onclick = ()=>{ ensureAudio(); buildStageGrid(); showScreen('screen-stages'); };
+document.getElementById('btnStagesBack').onclick = ()=>{ showScreen('screen-menu'); };
+document.getElementById('btnMute').onclick = (e)=>{
+  muted = !muted;
+  e.target.textContent = muted ? '🔇 소리 꺼짐' : '🔊 소리 켜짐';
+};
+document.getElementById('btnTowerInfo').onclick = ()=>{ renderTowerInfo(); showOverlay('towerInfoOverlay'); };
+document.getElementById('btnTowerInfoClose').onclick = ()=>{ hideOverlay('towerInfoOverlay'); };
+document.getElementById('btnTowerInfoExit').onclick = ()=>{ hideOverlay('towerInfoOverlay'); };
+document.getElementById('btnStartWave').onclick = ()=>{ beginWave(); };
+document.getElementById('btnDeselect').onclick = ()=>{ deselectSpot(); };
+document.getElementById('btnPauseOpen').onclick = ()=>{ openPause(); };
+document.getElementById('btnResume').onclick = ()=>{ closePause(); };
+document.getElementById('btnReset').onclick = ()=>{
+  hideOverlay('pauseOverlay');
+  resetGameState();
+  startPrepPhase();
+};
+document.getElementById('btnReturnMenu').onclick = ()=>{
+  hideOverlay('pauseOverlay');
+  G.state='menu';
+  showScreen('screen-menu');
+};
+document.getElementById('btnRetry').onclick = ()=>{
+  hideOverlay('gameOverOverlay');
+  resetGameState();
+  startPrepPhase();
+};
+document.getElementById('btnGoMenu1').onclick = ()=>{
+  hideOverlay('gameOverOverlay');
+  G.state='menu';
+  showScreen('screen-menu');
+};
+document.getElementById('btnGoMenu2').onclick = ()=>{
+  hideOverlay('clearOverlay');
+  G.state='menu';
+  showScreen('screen-menu');
+};
+
+updateHUD();
+</script>
+</body>
+</html>
